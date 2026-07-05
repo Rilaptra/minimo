@@ -1,14 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
+import { apiClient } from "../lib/apiClient";
 
 type House = { id: number; code: string; ownerName: string; address: string };
+
+// Tambahkan type untuk response API
+type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
 
 export function Dashboard() {
   const { data: houses, isLoading } = useQuery<House[]>({
     queryKey: ["houses"],
     queryFn: async () => {
-      const res = await fetch("/api/houses");
-      return res.json();
+      // Ambil response utuh, lalu kembalikan hanya properti .data
+      const res = await apiClient.get<ApiResponse<House[]>>("/api/houses");
+      return res.data;
     },
   });
 

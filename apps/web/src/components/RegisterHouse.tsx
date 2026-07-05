@@ -1,31 +1,33 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { apiClient } from "../lib/apiClient";
 import { queryClient } from "../lib/queryClient";
 import { Button } from "./ui/button";
 
 export function RegisterHouse() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const code = `JMT-${Math.floor(Math.random() * 9000 + 1000)}`;
-    await fetch("/api/houses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, ownerName: name, address }),
-    });
-    setName("");
-    setAddress("");
-    alert("Rumah berhasil didaftarkan!");
+    setError("");
+    try {
+      // Tidak perlu kirim code, backend yang generate!
+      await apiClient.post("/api/houses", { ownerName: name, address });
 
-    // Auto refresh data query agar langsung muncul di dashboard
-    queryClient.invalidateQueries({ queryKey: ["houses"] });
-    queryClient.invalidateQueries({ queryKey: ["reports"] });
+      setName("");
+      setAddress("");
 
-    // Pindah ke dashboard tanpa reload
-    navigate({ to: "/" });
+      // Auto refresh data query
+      queryClient.invalidateQueries({ queryKey: ["houses"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+
+      navigate({ to: "/" });
+    } catch (err) {
+      setError((err as Error).message || "Gagal mendaftarkan rumah");
+    }
   };
 
   return (
@@ -34,6 +36,7 @@ export function RegisterHouse() {
       onSubmit={submit}
     >
       <h2 className="text-xl font-semibold">Daftar Rumah Baru</h2>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
       <div>
         <label className="block text-sm font-medium mb-1" htmlFor="name">
           Nama Pemilik
