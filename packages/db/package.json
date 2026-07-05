@@ -1,0 +1,10 @@
+{
+  "name": "@minimo/db",
+  "main": "index.ts",
+  "dependencies": {
+    "drizzle-orm": "latest"
+  },
+  "devDependencies": {
+    "drizzle-kit": "latest"
+  }
+}
